@@ -179,6 +179,16 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 #lb .ctl{display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad);padding-bottom:max(14px,env(safe-area-inset-bottom));font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
 #lb .ctl button{padding:8px 4px;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
 #lb .ctl button:hover{color:var(--ink)}
+#lb .ctl{justify-content:center}
+#lb .pt{position:absolute;top:50%;transform:translateY(-50%);z-index:102;width:56px;height:96px;display:flex;align-items:center;justify-content:center;opacity:.85;transition:opacity .6s ease;cursor:pointer;background:none;border:0}
+#lb .pt.L{left:max(8px,env(safe-area-inset-left))}#lb .pt.R{right:max(8px,env(safe-area-inset-right))}
+#lb .pt svg{width:22px;height:38px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+#lb.dim .pt{opacity:.18}#lb .pt:hover{opacity:1!important}
+#close{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:103;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer}
+#close svg{width:22px;height:22px;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+#close:hover svg{stroke-width:3.6}
+#lb img{cursor:pointer}
+@media (max-width:700px){#lb .pt{width:40px;height:72px}#lb .pt svg{width:16px;height:28px}}
 
 /* responsive */
 @media (max-width: 1024px){
@@ -295,7 +305,10 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 <div id="peek"><img alt=""></div>
 <div id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
   <div class="stage" id="stage"><img id="lbimg" alt=""></div>
-  <div class="ctl"><button id="prev">← Prev</button><span id="lbcap"></span><button id="next">Next →</button><button id="close">Close ✕</button></div>
+  <button id="prev" class="pt L" aria-label="Previous page"><svg viewBox="0 0 24 40"><path d="M22 2 L3 20 L22 38"/></svg></button>
+  <button id="next" class="pt R" aria-label="Next page"><svg viewBox="0 0 24 40"><path d="M2 2 L21 20 L2 38"/></svg></button>
+  <button id="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M3 3 L21 21 M21 3 L3 21"/></svg></button>
+  <div class="ctl"><span id="lbcap"></span></div>
 </div>
 
 <script>
@@ -436,7 +449,7 @@ new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ tl.classL
 const lb=document.getElementById("lb"), li=document.getElementById("lbimg"), cap=document.getElementById("lbcap");
 let list=[],pos=0;
 document.addEventListener("click",e=>{ const f=e.target.closest(".shot"); if(!f) return;
-  list=[...f.closest(".gallery").querySelectorAll(".shot")]; pos=list.indexOf(f); show(); lb.classList.add("on"); document.body.style.overflow="hidden"; });
+  list=[...f.closest(".gallery").querySelectorAll(".shot")]; pos=list.indexOf(f); show(); lb.classList.add("on"); wake(); document.body.style.overflow="hidden"; });
 function show(){ lb.classList.remove("zoom"); li.src=list[pos].dataset.full; const t=list[pos].closest(".project").querySelector("h3").textContent; cap.textContent=`${t} — ${pos+1}/${list.length}`; }
 function close(){ document.querySelectorAll(".book").forEach(b=>b.remove()); turning=false; li.style.visibility=""; lb.classList.remove("on"); document.body.style.overflow=""; }
 document.getElementById("close").onclick=close;
@@ -468,7 +481,7 @@ function turn(dir){
     leaf.append(f,b); bk.appendChild(leaf);
     const gut=document.createElement("div"); gut.className="gut"; bk.appendChild(gut);
     document.body.appendChild(bk);
-    li.style.visibility="hidden";
+    li.style.visibility="hidden"; lb.classList.add("dim");
     const T=1000, E="cubic-bezier(.45,.05,.25,1)";
     const a=leaf.animate([{transform:"rotateY(0deg)"},{transform:`rotateY(${dir>0?-180:180}deg)`}],{duration:T,easing:E,fill:"forwards"});
     fsh.animate([{opacity:0},{opacity:1}],{duration:T/2,easing:"ease-in",fill:"forwards"});
@@ -485,7 +498,17 @@ function turn(dir){
 }
 document.getElementById("prev").onclick=()=>turn(-1);
 document.getElementById("next").onclick=()=>turn(1);
-li.onclick=()=>lb.classList.toggle("zoom");
+/* tap zones: outer 12.5% each side = turn page, centre 75% = zoom in / out */
+li.onclick=e=>{
+  if(lb.classList.contains("zoom")){ lb.classList.remove("zoom"); return; }
+  const r=li.getBoundingClientRect(), x=(e.clientX-r.left)/r.width;
+  if(x<0.125) turn(-1); else if(x>0.875) turn(1); else lb.classList.add("zoom");
+};
+document.getElementById("stage").addEventListener("click",e=>{ if(e.target!==e.currentTarget||lb.classList.contains("zoom")) return;
+  const r=li.getBoundingClientRect(); if(e.clientX<r.left) turn(-1); else if(e.clientX>r.right) turn(1); });
+/* page-turn arrows: bright when you arrive or move, then fade back */
+let dimT; function wake(){ lb.classList.remove("dim"); clearTimeout(dimT); dimT=setTimeout(()=>lb.classList.add("dim"),1600); }
+lb.addEventListener("mousemove",wake); lb.addEventListener("touchstart",wake,{passive:true});
 addEventListener("keydown",e=>{ if(!lb.classList.contains("on")) return;
   if(e.key==="Escape") close(); if(e.key==="ArrowRight") document.getElementById("next").click(); if(e.key==="ArrowLeft") document.getElementById("prev").click(); });
 let sx=null; lb.addEventListener("touchstart",e=>{ if(e.touches.length===1&&!lb.classList.contains("zoom")) sx=e.touches[0].clientX; },{passive:true});
