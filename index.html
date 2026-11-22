@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <title>Ahmad Rajabi — Architecture &amp; Urban Design Portfolio</title>
 <meta name="description" content="Portfolio of Ahmad Rajabi, architectural designer (MSc Politecnico di Milano): urban regeneration, landscape and architecture projects.">
 <meta property="og:title" content="Ahmad Rajabi — Architecture & Urban Design Portfolio">
@@ -29,7 +30,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 header.bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:16px var(--pad);padding-top:max(16px,env(safe-area-inset-top));background:rgba(255,255,255,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .4s,transform .5s var(--ease)}
 header.bar.scrolled{border-bottom-color:var(--hair)}
 header.bar.hide{transform:translateY(-100%)}
-.brand{font-weight:700;letter-spacing:.18em;font-size:13px;text-transform:uppercase;text-decoration:none}
+.brand{display:block;text-decoration:none;line-height:0}
+.brand img{height:22px;width:auto;display:block}
+@media (max-width:700px){.brand img{height:18px}}
 nav.top{display:flex;gap:clamp(14px,3vw,32px);font-size:13px;letter-spacing:.14em;text-transform:uppercase}
 nav.top a{text-decoration:none;color:var(--mid);transition:color .3s}
 nav.top a:hover,nav.top a.on{color:var(--ink)}
@@ -196,7 +199,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 <body>
 <div id="progress"></div>
 <header class="bar" id="bar">
-  <a class="brand" href="#top">Ahmad Rajabi</a>
+  <a class="brand" href="#top" aria-label="AA MAD Studio — Ahmad Rajabi, back to top"><img src="logo.svg" alt="AA MAD Studio"></a>
   <nav class="top">
     <a href="#work">Work</a>
     <a href="#about">About</a>
