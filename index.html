@@ -160,6 +160,15 @@ h4{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
 .contact .links a:hover{color:var(--ink)}
 footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:12px;color:var(--light);letter-spacing:.1em;max-width:var(--maxw);margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
+/* page-turn: every image is a two-page spread; the right (or left) page folds over the spine */
+.book{position:fixed;z-index:101;perspective:2200px;pointer-events:none}
+.book .pg{position:absolute;top:0;width:50%;height:100%;background-repeat:no-repeat;background-size:200% 100%}
+.book .L{left:0;background-position:0 0}.book .R{left:50%;background-position:100% 0}
+.book .leaf{position:absolute;top:0;width:50%;height:100%;transform-style:preserve-3d;will-change:transform}
+.book .leaf .face{position:absolute;inset:0;background-repeat:no-repeat;background-size:200% 100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.book .leaf .back{transform:rotateY(180deg)}
+.book .sh{position:absolute;inset:0;pointer-events:none;opacity:0}
+.book .gut{position:absolute;top:0;bottom:0;left:50%;width:6%;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.10) 48%,rgba(0,0,0,.16) 50%,rgba(0,0,0,.10) 52%,transparent);opacity:0}
 /* lightbox */
 #lb{position:fixed;inset:0;background:rgba(255,255,255,.97);z-index:100;display:none;flex-direction:column}
 #lb.on{display:flex}
@@ -429,10 +438,53 @@ let list=[],pos=0;
 document.addEventListener("click",e=>{ const f=e.target.closest(".shot"); if(!f) return;
   list=[...f.closest(".gallery").querySelectorAll(".shot")]; pos=list.indexOf(f); show(); lb.classList.add("on"); document.body.style.overflow="hidden"; });
 function show(){ lb.classList.remove("zoom"); li.src=list[pos].dataset.full; const t=list[pos].closest(".project").querySelector("h3").textContent; cap.textContent=`${t} — ${pos+1}/${list.length}`; }
-function close(){ lb.classList.remove("on"); document.body.style.overflow=""; }
+function close(){ document.querySelectorAll(".book").forEach(b=>b.remove()); turning=false; li.style.visibility=""; lb.classList.remove("on"); document.body.style.overflow=""; }
 document.getElementById("close").onclick=close;
-document.getElementById("prev").onclick=()=>{pos=(pos-1+list.length)%list.length;show();};
-document.getElementById("next").onclick=()=>{pos=(pos+1)%list.length;show();};
+/* turn the page like a booklet: each image = left page + right page */
+let turning=false;
+function turn(dir){
+  if(turning||list.length<2) return;
+  const np=(pos+dir+list.length)%list.length, cur=li.currentSrc||li.src, nxt=list[np].dataset.full;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches||lb.classList.contains("zoom")){pos=np;show();return;}
+  turning=true;
+  const pre=new Image(); pre.src=nxt;
+  const go=()=>{
+    const r=li.getBoundingClientRect();
+    const bk=document.createElement("div"); bk.className="book";
+    Object.assign(bk.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+    const u=x=>`url("${x}")`;
+    const pg=(cls,src)=>{const d=document.createElement("div");d.className="pg "+cls;d.style.backgroundImage=u(src);bk.appendChild(d);return d;};
+    /* static page that stays + the page revealed underneath */
+    let under;
+    if(dir>0){ pg("L",cur); under=pg("R",nxt); } else { under=pg("L",nxt); pg("R",cur); }
+    const ush=document.createElement("div"); ush.className="sh"; ush.style.background=dir>0?"linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,0) 60%)":"linear-gradient(270deg,rgba(0,0,0,.35),rgba(0,0,0,0) 60%)"; under.appendChild(ush);
+    /* the leaf that turns: front = current page, back = new page */
+    const leaf=document.createElement("div"); leaf.className="leaf";
+    leaf.style.left=dir>0?"50%":"0"; leaf.style.transformOrigin=dir>0?"0 50%":"100% 50%";
+    const f=document.createElement("div"); f.className="face front"; f.style.backgroundImage=u(cur); f.style.backgroundPosition=dir>0?"100% 0":"0 0";
+    const b=document.createElement("div"); b.className="face back";  b.style.backgroundImage=u(nxt); b.style.backgroundPosition=dir>0?"0 0":"100% 0";
+    const fsh=document.createElement("div"); fsh.className="sh"; fsh.style.background=dir>0?"linear-gradient(270deg,rgba(0,0,0,.0),rgba(0,0,0,.28))":"linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.28))"; f.appendChild(fsh);
+    const bsh=document.createElement("div"); bsh.className="sh"; bsh.style.background=dir>0?"linear-gradient(90deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.25))":"linear-gradient(270deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.25))"; b.appendChild(bsh);
+    leaf.append(f,b); bk.appendChild(leaf);
+    const gut=document.createElement("div"); gut.className="gut"; bk.appendChild(gut);
+    document.body.appendChild(bk);
+    li.style.visibility="hidden";
+    const T=1000, E="cubic-bezier(.45,.05,.25,1)";
+    const a=leaf.animate([{transform:"rotateY(0deg)"},{transform:`rotateY(${dir>0?-180:180}deg)`}],{duration:T,easing:E,fill:"forwards"});
+    fsh.animate([{opacity:0},{opacity:1}],{duration:T/2,easing:"ease-in",fill:"forwards"});
+    bsh.animate([{opacity:1},{opacity:0}],{duration:T/2,delay:T/2,easing:"ease-out",fill:"forwards"});
+    ush.animate([{opacity:1},{opacity:.6,offset:.5},{opacity:0}],{duration:T,easing:E,fill:"forwards"});
+    gut.animate([{opacity:0},{opacity:1,offset:.3},{opacity:1,offset:.7},{opacity:0}],{duration:T,fill:"forwards"});
+    a.onfinish=()=>{
+      pos=np; show();
+      const done=()=>{li.style.visibility="";bk.remove();turning=false;};
+      (li.decode?li.decode().then(done,done):done());
+    };
+  };
+  if(pre.complete) go(); else { pre.onload=go; pre.onerror=()=>{turning=false;pos=np;show();}; }
+}
+document.getElementById("prev").onclick=()=>turn(-1);
+document.getElementById("next").onclick=()=>turn(1);
 li.onclick=()=>lb.classList.toggle("zoom");
 addEventListener("keydown",e=>{ if(!lb.classList.contains("on")) return;
   if(e.key==="Escape") close(); if(e.key==="ArrowRight") document.getElementById("next").click(); if(e.key==="ArrowLeft") document.getElementById("prev").click(); });
