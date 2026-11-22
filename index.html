@@ -169,6 +169,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 .book .leaf .back{transform:rotateY(180deg)}
 .book .sh{position:absolute;inset:0;pointer-events:none;opacity:0}
 .book .gut{position:absolute;top:0;bottom:0;left:50%;width:6%;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.10) 48%,rgba(0,0,0,.16) 50%,rgba(0,0,0,.10) 52%,transparent);opacity:0}
+#zw{position:relative;z-index:1;transform-origin:50% 0}
 /* lightbox */
 #lb{position:fixed;inset:0;background:rgba(255,255,255,.97);z-index:100;display:none;flex-direction:column}
 #lb.on{display:flex}
@@ -230,6 +231,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
   </nav>
 </header>
 
+<div id="zw">
 <div class="hero" id="top">
   <h1><span><i>Ahmad</i></span><span><i>Rajabi</i></span></h1>
   <div class="sub"><span>Architecture</span><b>/</b><span>Urban Design</span><b>/</b><span>Landscape</span></div>
@@ -301,6 +303,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
   </div>
 </section>
 <footer><span>© 2026 Ahmad Rajabi</span><span>Architecture · Urban Design · Landscape</span></footer>
+</div><!-- /zw -->
 
 <div id="peek"><img alt=""></div>
 <div id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
@@ -595,6 +598,25 @@ function frame(){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+}
+
+/* scroll breathing: page eases out a touch while scrolling (more when faster), and settles back when you stop */
+{
+const zw=document.getElementById("zw"), reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let last=scrollY, v=0, sc=1, on=false;
+function tick(){
+  const y=scrollY, d=Math.abs(y-last); last=y;
+  v+= (d-v)*0.18;                                   /* smoothed scroll speed, px per frame */
+  const target=(reduce||document.getElementById("lb").classList.contains("on"))?1:1-Math.min(0.06,v*0.0011);
+  sc+=(target-sc)*0.12;
+  if(Math.abs(sc-1)>0.0005){
+    if(!on){zw.style.willChange="transform";on=true;}
+    zw.style.transformOrigin=`50% ${y+innerHeight/2}px`;
+    zw.style.transform=`scale(${sc.toFixed(4)})`;
+  } else if(on){ zw.style.transform="";zw.style.willChange="";on=false;sc=1; }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
 }
 </script>
 </body>
