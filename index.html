@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ahmad Rajabi — Architecture &amp; Urban Design Portfolio</title>
+<meta name="description" content="Portfolio of Ahmad Rajabi, architectural designer (MSc Politecnico di Milano): urban regeneration, landscape and architecture projects.">
+<meta property="og:title" content="Ahmad Rajabi — Architecture & Urban Design Portfolio">
+<meta property="og:description" content="Urban, landscape and architectural projects in Italy, Spain, Iran, Australia and Canada.">
+<meta property="og:image" content="img/t_risbaaf.jpg">
+<style>
+@font-face{font-family:"Carlito";src:url(fonts/Carlito-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Carlito";src:url(fonts/Carlito-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Carlito";src:url(fonts/Carlito-Italic.woff2) format("woff2");font-style:italic;font-display:swap}
+:root{
+  --ink:#1c1c1c;--mid:#6f6f6f;--light:#a3a3a3;--hair:#e3e3e3;--paper:#ffffff;--accent:#c8362d;
+  --pad:clamp(20px,5vw,72px);--maxw:1440px;
+  --ease:cubic-bezier(.2,.7,.1,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:"Carlito","Calibri",system-ui,sans-serif;color:var(--ink);background:var(--paper);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* progress + top bar */
+#progress{position:fixed;top:0;left:0;height:2px;width:100%;background:var(--accent);transform-origin:0 50%;transform:scaleX(0);z-index:60}
+header.bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:16px var(--pad);padding-top:max(16px,env(safe-area-inset-top));background:rgba(255,255,255,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .4s,transform .5s var(--ease)}
+header.bar.scrolled{border-bottom-color:var(--hair)}
+header.bar.hide{transform:translateY(-100%)}
+.brand{font-weight:700;letter-spacing:.18em;font-size:13px;text-transform:uppercase;text-decoration:none}
+nav.top{display:flex;gap:clamp(14px,3vw,32px);font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+nav.top a{text-decoration:none;color:var(--mid);transition:color .3s}
+nav.top a:hover,nav.top a.on{color:var(--ink)}
+
+/* hero */
+.hero{min-height:100svh;display:grid;align-content:end;padding:0 var(--pad) clamp(40px,8vh,96px);position:relative;overflow:hidden}
+.hero .grid{position:absolute;inset:0;background-image:linear-gradient(var(--hair) 1px,transparent 1px),linear-gradient(90deg,var(--hair) 1px,transparent 1px);background-size:56px 56px;opacity:.55;mask-image:linear-gradient(180deg,transparent 0%,#000 35%,#000 70%,transparent 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 35%,#000 70%,transparent 100%)}
+.hero h1{position:relative;font-weight:400;font-size:clamp(44px,11vw,168px);line-height:.92;letter-spacing:.04em;text-transform:uppercase}
+.hero h1 span{display:block;overflow:hidden}
+.hero h1 span i{display:block;font-style:normal;transform:translateY(105%);animation:rise 1.2s var(--ease) forwards}
+.hero h1 span:nth-child(2) i{animation-delay:.12s}
+.hero .sub{position:relative;margin-top:clamp(18px,3vh,32px);display:flex;flex-wrap:wrap;gap:8px 28px;font-size:clamp(14px,1.6vw,18px);letter-spacing:.16em;text-transform:uppercase;color:var(--mid);opacity:0;animation:fade 1s .6s forwards}
+.hero .sub b{color:var(--accent);font-weight:400}
+.cue{position:absolute;right:var(--pad);bottom:clamp(40px,8vh,96px);width:1px;height:72px;background:var(--hair);overflow:hidden}
+.cue::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--ink);animation:cue 2.2s 1.2s infinite var(--ease)}
+@keyframes rise{to{transform:none}}
+@keyframes fade{to{opacity:1}}
+@keyframes cue{0%{top:-40%}70%,100%{top:100%}}
+
+section{padding:clamp(64px,12vh,140px) var(--pad);max-width:var(--maxw);margin:0 auto}
+.label{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.label::before{content:"";width:22px;height:2px;background:var(--accent)}
+.statement{font-size:clamp(22px,3.2vw,40px);line-height:1.25;max-width:22em}
+.statement em{font-style:normal;color:var(--mid)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
+
+/* index */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 28px}
+.chip{padding:8px 16px;border:1px solid var(--hair);border-radius:999px;font-size:14px;letter-spacing:.06em;display:inline-flex;align-items:center;gap:8px;transition:background .3s,color .3s,border-color .3s}
+.chip small{font-size:12px;color:var(--light);transition:color .3s}
+.chip:hover{border-color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.on small{color:#bbb}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.c-urban{background:#c8362d}.c-landscape{background:#5f8a4a}.c-architecture{background:#1c1c1c}.c-interior{background:#b59a6a}.c-research{background:#8a8a8a}
+
+.scaleaxis{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--light);margin-bottom:10px}
+.scaleaxis .ln{flex:1;height:1px;background:var(--hair);position:relative}
+.scaleaxis .ln::after{content:"";position:absolute;right:-1px;top:-3px;border:3.5px solid transparent;border-left:6px solid var(--hair)}
+
+ol.index{list-style:none;position:relative;border-top:1px solid var(--ink)}
+ol.index li{position:relative;border-bottom:1px solid var(--hair);transition:opacity .5s var(--ease),transform .7s var(--ease)}
+ol.index li.dim{opacity:.22}
+ol.index a{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:16px;padding:18px 0;text-decoration:none}
+ol.index .n{font-size:13px;color:var(--light);font-variant-numeric:tabular-nums}
+ol.index .t{font-size:clamp(18px,2.1vw,26px);line-height:1.2;transition:transform .5s var(--ease)}
+ol.index .m{display:block;font-size:14px;color:var(--mid);margin-top:4px}
+ol.index .tags{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+ol.index .yr{font-size:14px;color:var(--mid);margin-left:14px;font-variant-numeric:tabular-nums;min-width:74px;text-align:right}
+ol.index a:hover .t{transform:translateX(8px)}
+ol.index .thumb{display:none}
+ol.index .side{display:flex;align-items:center;justify-content:flex-end}
+/* hover preview (pointer devices) */
+#peek{position:fixed;width:300px;aspect-ratio:4/3;pointer-events:none;z-index:40;opacity:0;transform:scale(.92);transition:opacity .35s,transform .45s var(--ease);background:#f3f3f3;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.12)}
+#peek img{width:100%;height:100%;object-fit:cover}
+#peek.on{opacity:1;transform:none}
+.grouphead{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--light);padding:22px 0 6px}
+
+/* projects */
+.project{display:grid;grid-template-columns:minmax(240px,30%) 1fr;gap:clamp(24px,4vw,64px);padding-top:clamp(56px,10vh,120px);border-top:1px solid var(--hair);margin-top:clamp(56px,10vh,120px);scroll-margin-top:60px}
+.project:first-of-type{border-top:0;margin-top:0}
+.meta{position:sticky;top:90px;align-self:start}
+.meta .num{font-size:13px;color:var(--light);letter-spacing:.1em}
+.meta h3{font-size:clamp(26px,3vw,40px);font-weight:400;line-height:1.08;margin:10px 0 14px}
+.meta dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin-bottom:18px}
+.meta dt{color:var(--light);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;padding-top:2px}
+.meta p{font-size:16px;color:#333;margin-bottom:12px;max-width:34em}
+.meta .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.tag{font-size:12px;letter-spacing:.08em;padding:4px 10px;border:1px solid var(--hair);border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+.gallery{display:grid;gap:clamp(12px,2vw,24px)}
+.shot{position:relative;overflow:hidden;background:#f5f5f5;cursor:zoom-in;clip-path:inset(0 0 100% 0);transition:clip-path 1.3s var(--ease)}
+.shotwrap.in .shot{clip-path:inset(0 0 0 0)}
+.shot img{width:100%;height:auto;transform:scale(1.06);transition:transform 1.6s var(--ease)}
+.shotwrap.in .shot img{transform:none}
+.shot:hover img{transform:scale(1.015)}
+.back{display:inline-block;margin-top:6px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);text-decoration:none}
+.back:hover{color:var(--ink)}
+
+/* about */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,96px)}
+.about h2{font-size:clamp(30px,4vw,54px);font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+.about .role{margin-top:10px;color:var(--mid);letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+.about p{margin-top:22px;max-width:34em}
+.rows{margin-top:8px}
+.row{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--hair);font-size:15.5px}
+.row .y{color:var(--light);font-variant-numeric:tabular-nums}
+.row b{font-weight:700}
+.row span{color:var(--mid)}
+h4{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;margin:38px 0 6px}
+
+/* timeline */
+.tl{position:relative;height:300px;margin-top:20px}
+.tl .ax{position:absolute;left:0;right:0;bottom:24px;height:1px;background:var(--ink)}
+.tl .tk{position:absolute;bottom:4px;font-size:11.5px;color:var(--light);transform:translateX(-50%)}
+.tl .tk::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:6px;background:var(--ink)}
+.tl .br{position:absolute;height:9px;background:var(--ink);transform-origin:0 50%;transform:scaleX(0);transition:transform 1.2s var(--ease)}
+.tl .br.g{background:#a9a9a9}.tl .br.o{background:#fff;border:1px solid var(--ink)}
+.tl .lb{position:absolute;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .8s .5s}
+.tl.in .br{transform:none}.tl.in .lb{opacity:1}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--mid);margin-top:6px}
+.legend i{display:inline-block;width:18px;height:7px;background:var(--ink);margin-right:6px;vertical-align:1px}
+.legend i.g{background:#a9a9a9}.legend i.o{background:#fff;border:1px solid var(--ink)}
+
+/* contact */
+.contact{border-top:1px solid var(--ink)}
+.contact .big{font-size:clamp(28px,5.4vw,76px);line-height:1.05;text-decoration:none;display:inline-block;margin-top:10px;background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 2px no-repeat;transition:background-size .6s var(--ease)}
+.contact .big:hover{background-size:100% 2px}
+.contact .links{display:flex;flex-wrap:wrap;gap:12px 36px;margin-top:34px;font-size:14px;letter-spacing:.12em;text-transform:uppercase}
+.contact .links a{text-decoration:none;color:var(--mid)}
+.contact .links a:hover{color:var(--ink)}
+footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:12px;color:var(--light);letter-spacing:.1em;max-width:var(--maxw);margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+/* lightbox */
+#lb{position:fixed;inset:0;background:rgba(255,255,255,.97);z-index:100;display:none;flex-direction:column}
+#lb.on{display:flex}
+#lb .stage{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;touch-action:pan-x pan-y pinch-zoom}
+#lb img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;transition:opacity .3s}
+#lb.zoom .stage{display:block}
+#lb.zoom img{max-width:none;max-height:none;width:240%;cursor:zoom-out}
+#lb .ctl{display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad);padding-bottom:max(14px,env(safe-area-inset-bottom));font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
+#lb .ctl button{padding:8px 4px;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+#lb .ctl button:hover{color:var(--ink)}
+
+/* responsive */
+@media (max-width: 1024px){
+  .project{grid-template-columns:1fr}
+  .meta{position:static}
+  .about{grid-template-columns:1fr}
+}
+@media (max-width: 700px){
+  body{font-size:16px}
+  nav.top a.hide-s{display:none}
+  ol.index a{grid-template-columns:64px 1fr;gap:14px;padding:14px 0}
+  ol.index .n{display:none}
+  ol.index .thumb{display:block;width:64px;height:64px;object-fit:cover;background:#f2f2f2}
+  ol.index .side{grid-column:2;display:flex;align-items:center;gap:10px;margin-top:-6px}
+  ol.index .yr{margin-left:0;min-width:0;text-align:left}
+  .scaleaxis{display:none}
+  .row{grid-template-columns:84px 1fr}
+  .tl{height:300px}
+  .tl .lb{font-size:10.5px}
+  .cue{display:none}
+}
+@media (hover:none){#peek{display:none}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv,.shot,.shot img,.tl .br,.tl .lb,.hero h1 span i,.hero .sub{opacity:1!important;transform:none!important;clip-path:none!important}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<header class="bar" id="bar">
+  <a class="brand" href="#top">Ahmad Rajabi</a>
+  <nav class="top">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact" class="hide-s">Contact</a>
+  </nav>
+</header>
+
+<div class="hero" id="top">
+  <div class="grid"></div>
+  <h1><span><i>Ahmad</i></span><span><i>Rajabi</i></span></h1>
+  <div class="sub"><span>Architecture</span><b>/</b><span>Urban Design</span><b>/</b><span>Landscape</span></div>
+  <div class="cue"></div>
+</div>
+
+<section>
+  <div class="label rv">Portfolio</div>
+  <p class="statement rv d1">Architect and urban designer, MSc Politecnico di Milano. <em>Projects across scales, from the city and its landscapes to buildings and interiors, with a focus on transforming existing places: industrial sites, military barracks and heritage.</em></p>
+</section>
+
+<section id="work">
+  <div class="label rv">Contents</div>
+  <div class="filters rv d1" id="filters"></div>
+  <div class="scaleaxis rv d2"><span>Interior</span><div class="ln"></div><span>Architecture</span><div class="ln"></div><span>Landscape</span><div class="ln"></div><span>Urban</span></div>
+  <ol class="index" id="index"></ol>
+</section>
+
+<section id="projects" style="padding-top:0"></section>
+
+<section id="about">
+  <div class="about">
+    <div>
+      <div class="label rv">About</div>
+      <h2 class="rv d1">Ahmad Rajabi</h2>
+      <div class="role rv d1">Architectural Designer · MSc Politecnico di Milano</div>
+      <p class="rv d2">Architectural designer with 7+ years of practice across Italy, Spain, Iran and Canada. I work from concept and competition design through visualization and presentation, with a focus on transforming existing buildings, industrial sites and heritage. I combine 10+ years of Rhino/Grasshopper and Adobe Creative Suite with visualization both classic and AI-assisted.</p>
+      <h4 class="rv">Education</h4>
+      <div class="rows rv">
+        <div class="row"><div class="y">2014 – 2017</div><div><b>MSc in Architecture</b>, Politecnico di Milano <span>· Sustainable Architecture in Multi-Scale Projects, 110 cum laude</span></div></div>
+        <div class="row"><div class="y">2016 – 2017</div><div><b>Exchange</b>, University of Technology Sydney <span>· Landscape Ecology, Sustainable Urban Design</span></div></div>
+        <div class="row"><div class="y">2009 – 2014</div><div><b>BSc in Architectural Engineering</b>, Isfahan Azad University</div></div>
+      </div>
+      <h4 class="rv">Skills</h4>
+      <div class="rows rv">
+        <div class="row"><div class="y">Design</div><div>Rhino, Grasshopper (10+ years, taught at university level), SketchUp</div></div>
+        <div class="row"><div class="y">Visualization</div><div>D5 Render, Twinmotion, Lumion, Visoid, AI-assisted rendering</div></div>
+        <div class="row"><div class="y">Graphics</div><div>Adobe Creative Suite (10+ years)</div></div>
+        <div class="row"><div class="y">BIM &amp; CAD</div><div>Revit, ArchiCAD, AutoCAD, MicroSurvey CAD</div></div>
+        <div class="row"><div class="y">Site</div><div>Topographic and site surveys, photogrammetry, heritage documentation</div></div>
+        <div class="row"><div class="y">Languages</div><div>Persian, English (C1), Italian (B1), French (A2), German (A1)</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="label rv">Timeline</div>
+      <div class="tl" id="tl"></div>
+      <div class="legend"><span><i></i>Practice</span><span><i class="g"></i>Research &amp; teaching</span><span><i class="o"></i>Education</span></div>
+      <h4 class="rv">Experience</h4>
+      <div class="rows rv">
+        <div class="row"><div class="y">2025 – now</div><div><b>Design Architect and Researcher</b> — Dami Lee (Nolli Studio), Vancouver · hybrid</div></div>
+        <div class="row"><div class="y">2026 – now</div><div><b>Survey Drafter</b> — Ambit Land Surveying, BC</div></div>
+        <div class="row"><div class="y">2019 – 2025</div><div><b>Architectural and Environmental Designer</b> — O’Rain (start-up)</div></div>
+        <div class="row"><div class="y">2021 – 2022</div><div><b>Architect and Team Manager</b> — Entekhab Design Studio, Isfahan</div></div>
+        <div class="row"><div class="y">2020 – 2021</div><div><b>Project Architect</b> — FMZD, Tehran</div></div>
+        <div class="row"><div class="y">2018 – 2020</div><div><b>Architectural Designer</b> — Shahr-o-Khaneh Consulting Engineers</div></div>
+        <div class="row"><div class="y">2018 – 2020</div><div><b>Researcher</b> — Research Institute for Cultural Heritage, Tehran</div></div>
+        <div class="row"><div class="y">2017 – 2018</div><div><b>Architectural Intern (Erasmus+)</b> — SVC Arquitectes, Barcelona</div></div>
+        <div class="row"><div class="y">2010 – 2014</div><div><b>Drafter</b> — Modern Eskan, Isfahan</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="label rv" style="margin-top:56px">Contact</div>
+  <div class="links rv d2">
+    <span>+1 672 558 6249</span>
+    <span>Chilliwack, BC, Canada</span>
+    <a href="Ahmad_Rajabi_CV.pdf" download>Download CV ↓</a>
+  </div>
+</section>
+<footer><span>© 2026 Ahmad Rajabi</span><span>Architecture · Urban Design · Landscape</span></footer>
+
+<div id="peek"><img alt=""></div>
+<div id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <div class="stage" id="stage"><img id="lbimg" alt=""></div>
+  <div class="ctl"><button id="prev">← Prev</button><span id="lbcap"></span><button id="next">Next →</button><button id="close">Close ✕</button></div>
+</div>
+
+<script>
+const P = [
+ {id:"risbaaf",t:"Risbaaf Industrial Urban Regeneration",place:"Isfahan, Iran",yr:"2018",ctx:"National competition, Ministry of Roads and Urban Development",role:"Team member, 4th prize of 5 winners",tags:["urban","landscape"],pages:[32,33,34],
+  d:["The Risbaaf textile factory is part of Isfahan’s industrial heritage, from the era when the city was called the “Manchester of the Middle East”, and sits beside Chaharbagh Bala, the city’s historic garden boulevard.","The proposal opens the complex to daily life: the Chaharbagh axis extends into a pedestrian public square between the metro station and the main entrance, and the factory halls become an educational centre for fashion and textile, a FabLab, exhibition halls, cafés and shops."]},
+ {id:"mameli",t:"Silence Between: Caserma Mameli",place:"Milan, Italy",yr:"2017",ctx:"MSc thesis, Politecnico di Milano",role:"Professors Karin Hofert, Riccardo Genta",tags:["urban","architecture","landscape"],pages:[13,14,15,16,17,18,19,20],
+  d:["A former military barracks becomes a university of performing arts, tied into the city near Bocconi University and the railway.","The masterplan reads Milan’s system of courtyards and voids, keeps the U-shaped building, its timber roofs, trees and parts of the wall, and opens the enclosed site only where needed, so the memory of the caserma stays legible."]},
+ {id:"montello",t:"Riformare Milano: Caserma Montello",place:"Milan, Italy",yr:"2015",ctx:"MSc Multiscale Urban Design Studio, Politecnico di Milano",role:"Professors Karin Hofert, Andrea Cammarata, Sandro Rolla, Riccardo Genta",tags:["urban","architecture"],pages:[21,22,23],
+  d:["Part of the city’s Riformare Milano initiative after EXPO 2015: regenerating a pre-WWI military site and integrating it into the urban fabric.","The 1910 main building becomes a neighbourhood community centre; a mat-building strategy opens the open spaces, and a Food FabLab links agriculture and food production to a sustainable city."]},
+ {id:"wollongong",t:"Wollongong: Urban Sustainability",place:"NSW, Australia",yr:"2017",ctx:"Urban Sustainable Design and Development, UTS Sydney",role:"Essay and urban proposal",tags:["urban"],pages:[30,31],
+  d:["A strategy for a low-density CBD between beach and railway: densify with expandable towers and mid-rise buildings, add public space, and “touch the earth lightly”.","The main proposal is a pedestrian and cycle path crossing the CBD like a decumanus, linking the station to the university."]},
+ {id:"minhocao",t:"Minhocão",place:"São Paulo, Brazil",yr:"2016",ctx:"MSc Landscape Architecture, Politecnico di Milano",role:"Professor Henrique Pessoa Pereira Alves",tags:["urban","landscape"],pages:[26,27],
+  d:["Minhocão is an elevated highway that cuts through São Paulo’s urban fabric. As the city considers transforming it, the project proposes a large-scale urban landscape, developed in detail on one section of the highway."]},
+ {id:"flotestado",t:"Flotestado",place:"Oceans",yr:"2016",ctx:"IAAC 6th Advanced Architecture Contest, “Productive City”",role:"Competition entry",tags:["urban"],pages:[37,38],
+  d:["A speculative proposal for a productive city on the ocean, developed for the IAAC “Productive City” contest."]},
+ {id:"landarch",t:"Land-Arch: Architecture on the Coast",place:"Porto, Portugal",yr:"2016",ctx:"Workshop, Architecture in Landscape",role:"Professors Camillo Robello, Kiana Jalali",tags:["landscape","architecture"],pages:[24,25],
+  d:["A three-day workshop on how architecture and landscape can develop together: a museum for landscape art that extends from the park behind it to the beach in front, with an underground level connecting the existing square."]},
+ {id:"gardens",t:"Historical Gardens: Documentation",place:"Naein, Ardestan, SarhangAbad, Iran",yr:"2018 – 2020",ctx:"Research Institute for Cultural Heritage, Tehran",role:"Independent researcher",tags:["research","landscape"],pages:[11],
+  d:["Documentation of three historic Persian gardens along the ancient East–West trade route, at scales from continental to architectural: architecture, topography, irrigation and planting.","Methods combined archival research, traditional survey, photogrammetry and 3D modelling, and the work produced guidelines for documenting landscape heritage."]},
+ {id:"orain",t:"O’Rain Feasibility Studies",place:"British Columbia, Canada",yr:"2023 – 2024",ctx:"O’Rain (start-up)",role:"Designer and researcher",tags:["research","landscape"],pages:[4],
+  d:["Rainwater harvesting systems for different environments: solar farms with collection membranes, coastal communities, remote islands on floating platforms, and inland remote communities."]},
+ {id:"pinocchio",t:"Children Library: Pinocchio",place:"Collodi, Italy",yr:"2017",ctx:"YAC — Young Architects Competitions",role:"Competition entry",tags:["architecture","landscape"],pages:[35,36],
+  d:["A children’s library in a former paper factory that reconnects the isolated Pinocchio Park to the town: the library and its landscape link the park to the forgotten plaza in front of Collodi’s church."]},
+ {id:"catasus",t:"Habitatges Carolina Catasús",place:"Barcelona, Spain",yr:"2017 – 2018",ctx:"IMPSOL competition, Block T-ILLA5",role:"Internship, Serra Vives Cartagena Arquitectes",tags:["architecture"],pages:[12],
+  d:["Social housing competition in Barcelona, developed during an Erasmus+ traineeship at SVC Arquitectes."]},
+ {id:"pergolas",t:"Suspended Pergolas Residence",place:"Tehran, Iran",yr:"2020 – 2021",ctx:"FMZD — Farshad Mehdizadeh Design",role:"Project Architect (lead architect Farshad Mehdizadeh)",tags:["architecture"],pages:[7,8,9,10],
+  d:["A mid-rise residential building in Farmanieh, now under construction. Suspended pergolas and terraces bring the memory of the Persian garden into the living spaces."]},
+ {id:"eastriver",t:"East River House",place:"Isfahan, Iran",yr:"2012",ctx:"BSc Architecture Studio",role:"Professor M. Boroumand",tags:["architecture"],pages:[28,29],
+  d:["A house for a three-generation family on a steep slope between a river and a street, shaped by views of the winding river and by shade from the strong summer sun."]},
+ {id:"noor",t:"Noor House",place:"Isfahan, Iran",yr:"2022",ctx:"Individual project",role:"Designer",tags:["interior"],pages:[5,6],
+  d:["Renovation of a basement apartment: rebuilt plumbing, old smoke ducts reused as vents, a reorganised plan with ensuite and walk-in closet, and a single level throughout. Named after my grandmother — Noor, “the light”."]}
+];
+const SCALES=[["all","All"],["urban","Urban"],["landscape","Landscape"],["architecture","Architecture"],["interior","Interior"],["research","Research"]];
+const RANK={urban:3,landscape:2,architecture:1,interior:0,research:-1};
+const pad=n=>String(n).padStart(2,"0");
+
+/* build index + projects */
+const idx=document.getElementById("index"), prj=document.getElementById("projects");
+P.forEach((p,i)=>{
+  p.n=i+1;
+  const li=document.createElement("li"); li.dataset.id=p.id;
+  li.innerHTML=`<a href="#${p.id}"><span class="n">${pad(i+1)}</span><img class="thumb" src="img/t_${p.id}.jpg" alt="" loading="lazy">
+   <span><span class="t">${p.t}</span><span class="m">${p.place} · ${p.ctx}</span></span>
+   <span class="side"><span class="tags">${p.tags.map(t=>`<span class="dot c-${t}" title="${t}"></span>`).join("")}</span><span class="yr">${p.yr}</span></span></a>`;
+  idx.appendChild(li); p.li=li;
+  const s=document.createElement("article"); s.className="project"; s.id=p.id;
+  s.innerHTML=`<div class="meta"><div class="num rv">${pad(i+1)} / ${pad(P.length)}</div><h3 class="rv d1">${p.t}</h3>
+   <div class="tags rv d1">${p.tags.map(t=>`<span class="tag"><span class="dot c-${t}"></span>${t[0].toUpperCase()+t.slice(1)}</span>`).join("")}</div>
+   <dl class="rv d2"><dt>Place</dt><dd>${p.place}</dd><dt>Year</dt><dd>${p.yr}</dd><dt>Context</dt><dd>${p.ctx}</dd><dt>Role</dt><dd>${p.role}</dd></dl>
+   ${p.d.map(x=>`<p class="rv d2">${x}</p>`).join("")}<a class="back" href="#work">↑ Contents</a></div>
+   <div class="gallery">${p.pages.map(n=>`<figure class="shot" data-full="img/p${pad(n)}.jpg"><img src="img/p${pad(n)}_s.jpg" srcset="img/p${pad(n)}_s.jpg 800w, img/p${pad(n)}.jpg 2000w" sizes="(max-width:1024px) 92vw, 64vw" alt="${p.t}, sheet" loading="lazy" width="2000" height="1414"></figure>`).join("")}</div>`;
+  prj.appendChild(s);
+});
+
+/* filters with counts + FLIP shift */
+const fwrap=document.getElementById("filters");
+SCALES.forEach(([k,l],i)=>{
+  const c=k==="all"?P.length:P.filter(p=>p.tags.includes(k)).length;
+  const b=document.createElement("button"); b.className="chip"+(i===0?" on":""); b.dataset.k=k;
+  b.innerHTML=(k==="all"?"":`<span class="dot c-${k}"></span>`)+`${l} <small>${c}</small>`;
+  b.onclick=()=>applyFilter(k,b); fwrap.appendChild(b);
+});
+function applyFilter(k,btn){
+  fwrap.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===btn));
+  const items=[...idx.children]; const first=new Map(items.map(el=>[el,el.getBoundingClientRect().top]));
+  let order;
+  if(k==="all") order=[...P];
+  else { const on=P.filter(p=>p.tags.includes(k)), off=P.filter(p=>!p.tags.includes(k)); order=[...on,...off]; }
+  order.forEach(p=>{ idx.appendChild(p.li); p.li.classList.toggle("dim",k!=="all"&&!p.tags.includes(k)); });
+  idx.querySelectorAll(".n").forEach((n,i)=>n.textContent=pad(i+1));
+  items.forEach(el=>{ const dy=first.get(el)-el.getBoundingClientRect().top; if(!dy) return;
+    el.style.transition="none"; el.style.transform=`translateY(${dy}px)`; el.getBoundingClientRect();
+    el.style.transition=""; el.style.transform=""; });
+}
+
+/* reveal on scroll */
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{rootMargin:"0px 0px -8% 0px",threshold:.08});
+document.querySelectorAll(".rv").forEach(el=>io.observe(el));
+const go=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); go.unobserve(e.target);} }),{rootMargin:"0px 0px -6% 0px",threshold:0});
+document.querySelectorAll(".shot").forEach(f=>{ const w=document.createElement("div"); w.className="shotwrap"; f.parentNode.insertBefore(w,f); w.appendChild(f); go.observe(w); });
+
+/* progress bar, header hide on scroll down, active nav */
+const bar=document.getElementById("bar"), prog=document.getElementById("progress"); let lastY=0;
+addEventListener("scroll",()=>{
+  const y=scrollY, h=document.documentElement.scrollHeight-innerHeight;
+  prog.style.transform=`scaleX(${h>0?y/h:0})`;
+  bar.classList.toggle("scrolled",y>10);
+  bar.classList.toggle("hide",y>lastY&&y>400&&!document.getElementById("lb").classList.contains("on")); lastY=y;
+},{passive:true});
+const navs=[...document.querySelectorAll("nav.top a")];
+const so=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const id=e.target.id==="projects"?"work":e.target.id; navs.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+id)); }}),{rootMargin:"-45% 0px -50% 0px"});
+["work","projects","about","contact"].forEach(id=>so.observe(document.getElementById(id)));
+
+/* hover preview on contents (pointer devices) */
+const peek=document.getElementById("peek"), pimg=peek.querySelector("img");
+if(matchMedia("(hover:hover)").matches){
+  idx.addEventListener("mousemove",e=>{ const li=e.target.closest("li"); if(!li){peek.classList.remove("on");return;}
+    const src=`img/t_${li.dataset.id}.jpg`; if(!pimg.src.endsWith(src)) pimg.src=src;
+    peek.style.left=Math.min(e.clientX+28,innerWidth-320)+"px"; peek.style.top=(e.clientY-110)+"px"; peek.classList.add("on"); });
+  idx.addEventListener("mouseleave",()=>peek.classList.remove("on"));
+}
+
+/* timeline */
+const tl=document.getElementById("tl");
+const T=[[2009,2014,0,"o","BSc Isfahan"],[2010.6,2014,1,"","Modern Eskan"],[2014,2017,0,"o","MSc Politecnico di Milano"],[2016.6,2017.4,1,"o","UTS Sydney"],
+ [2017.5,2018.5,2,"","SVC Barcelona"],[2018,2020,3,"g","Cultural Heritage Research Institute"],[2018,2020,4,"","Shahr-o-Khaneh"],[2019,2025,6,"","O’Rain"],
+ [2020,2021,1,"","FMZD"],[2021,2022.6,5,"","Entekhab"],[2025,2026.9,1,"","Dami Lee"],[2026.5,2026.9,0,"","Ambit"]];
+const y0=2009,y1=2027,X=y=>(y-y0)/(y1-y0)*100;
+T.forEach(([s,e,lane,k,l],i)=>{
+  const top=232-lane*33;
+  const b=document.createElement("div"); b.className="br "+k; b.style.cssText=`left:${X(s)}%;width:${Math.max(X(e)-X(s),.9)}%;top:${top}px;transition-delay:${i*60}ms`; tl.appendChild(b);
+  const t=document.createElement("div"); t.className="lb"; t.textContent=l;
+  if(l==="Ambit"){ t.style.cssText=`right:0;top:${top+12}px`; } else if(X(s)>70){ t.style.cssText=`right:${100-X(e)}%;top:${top-16}px`; } else t.style.cssText=`left:${X(s)}%;top:${top-16}px`;
+  tl.appendChild(t);
+});
+for(let y=2010;y<=2026;y+=2){ const t=document.createElement("div"); t.className="tk"; t.style.left=X(y)+"%"; t.textContent=(innerWidth<700?"’"+String(y).slice(2):y); tl.appendChild(t); }
+const ax=document.createElement("div"); ax.className="ax"; tl.appendChild(ax);
+new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ tl.classList.add("in"); o.disconnect(); }}),{threshold:.3}).observe(tl);
+
+/* lightbox */
+const lb=document.getElementById("lb"), li=document.getElementById("lbimg"), cap=document.getElementById("lbcap");
+let list=[],pos=0;
+document.addEventListener("click",e=>{ const f=e.target.closest(".shot"); if(!f) return;
+  list=[...f.closest(".gallery").querySelectorAll(".shot")]; pos=list.indexOf(f); show(); lb.classList.add("on"); document.body.style.overflow="hidden"; });
+function show(){ lb.classList.remove("zoom"); li.src=list[pos].dataset.full; const t=list[pos].closest(".project").querySelector("h3").textContent; cap.textContent=`${t} — ${pos+1}/${list.length}`; }
+function close(){ lb.classList.remove("on"); document.body.style.overflow=""; }
+document.getElementById("close").onclick=close;
+document.getElementById("prev").onclick=()=>{pos=(pos-1+list.length)%list.length;show();};
+document.getElementById("next").onclick=()=>{pos=(pos+1)%list.length;show();};
+li.onclick=()=>lb.classList.toggle("zoom");
+addEventListener("keydown",e=>{ if(!lb.classList.contains("on")) return;
+  if(e.key==="Escape") close(); if(e.key==="ArrowRight") document.getElementById("next").click(); if(e.key==="ArrowLeft") document.getElementById("prev").click(); });
+let sx=null; lb.addEventListener("touchstart",e=>{ if(e.touches.length===1&&!lb.classList.contains("zoom")) sx=e.touches[0].clientX; },{passive:true});
+lb.addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>60) (dx<0?document.getElementById("next"):document.getElementById("prev")).click(); });
+</script>
+</body>
+</html>
