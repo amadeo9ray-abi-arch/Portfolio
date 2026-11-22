@@ -22,6 +22,8 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:"Carlito","Calibri",system-ui,sans-serif;color:var(--ink);background:var(--paper);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
 img{display:block;max-width:100%}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+.hero,section,footer{position:relative;z-index:1}
 a{color:inherit}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
@@ -197,6 +199,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 </style>
 </head>
 <body>
+<canvas id="bg" aria-hidden="true"></canvas>
 <div id="progress"></div>
 <header class="bar" id="bar">
   <a class="brand" href="#top" aria-label="AA MAD Studio — Ahmad Rajabi, back to top"><img src="logo.svg" alt="AA MAD Studio"></a>
@@ -208,7 +211,6 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 </header>
 
 <div class="hero" id="top">
-  <div class="grid"></div>
   <h1><span><i>Ahmad</i></span><span><i>Rajabi</i></span></h1>
   <div class="sub"><span>Architecture</span><b>/</b><span>Urban Design</span><b>/</b><span>Landscape</span></div>
   <div class="cue"></div>
@@ -435,6 +437,65 @@ addEventListener("keydown",e=>{ if(!lb.classList.contains("on")) return;
   if(e.key==="Escape") close(); if(e.key==="ArrowRight") document.getElementById("next").click(); if(e.key==="ArrowLeft") document.getElementById("prev").click(); });
 let sx=null; lb.addEventListener("touchstart",e=>{ if(e.touches.length===1&&!lb.classList.contains("zoom")) sx=e.touches[0].clientX; },{passive:true});
 lb.addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>60) (dx<0?document.getElementById("next"):document.getElementById("prev")).click(); });
+
+/* 3D grid background: camera flies through a grid tunnel as you scroll; nodes take the colours of the project in view */
+{
+const cv=document.getElementById("bg"), cx=cv.getContext("2d");
+const COL={urban:[200,54,45],landscape:[95,138,74],architecture:[28,28,28],interior:[181,154,106],research:[138,138,138]};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W,H,DPR,small;
+function size(){ DPR=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight; small=W<700;
+  cv.width=W*DPR; cv.height=H*DPR; cx.setTransform(DPR,0,0,DPR,0,0); }
+size(); addEventListener("resize",size);
+let camZ=scrollY*0.02, vel=0, active=[], mix=0, lastActive=[];
+const S=1, NEAR=0.35, FAR=small?22:28, XS=small?5:8, PLANES=[-0.8,0.8];
+const hash=(a,b)=>{ let h=(a*374761393+b*668265263)^0x5bd1e995; h=(h^(h>>>13))*1274126177; return ((h^(h>>>16))>>>0)/4294967296; };
+/* which project is in view */
+const po=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const p=P.find(q=>q.id===e.target.id); if(p){ active=p.tags; } } }),{rootMargin:"-40% 0px -40% 0px"});
+P.forEach(p=>po.observe(p.sec));
+const hide=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) active=[]; }),{rootMargin:"-40% 0px -40% 0px"});
+["top","about","contact","work"].forEach(id=>{ const el=document.getElementById(id); if(el) hide.observe(el); });
+function frame(){
+  const target=scrollY*0.02;
+  const prev=camZ; camZ+=(target-camZ)*(reduce?1:0.12); vel+=((camZ-prev)-vel)*0.3;
+  if(active.length){ lastActive=active; mix=Math.min(1,mix+0.04); } else mix=Math.max(0,mix-0.04);
+  cx.clearRect(0,0,W,H);
+  const f=Math.min(H*0.62,W*0.9), hy=H*0.5, cxm=W/2;
+  const off=camZ%S, base=Math.floor(camZ/S);
+  for(const Y of PLANES){
+    /* transverse lines */
+    for(let k=0;k<FAR;k++){ const z=k*S-off; if(z<NEAR) continue;
+      const q=1-z/FAR, a=0.16*q*q; const y=hy-Y/z*f;
+      cx.strokeStyle=`rgba(28,28,28,${a})`; cx.lineWidth=1; cx.beginPath();
+      cx.moveTo(cxm-XS/z*f,y); cx.lineTo(cxm+XS/z*f,y); cx.stroke(); }
+    /* longitudinal rails, drawn in segments so they fade with distance like the cross lines */
+    for(let k=0;k<FAR-1;k++){ let z1=k*S-off, z2=z1+S; if(z2<NEAR) continue; z1=Math.max(z1,NEAR);
+      const q=1-z1/FAR, a=0.16*q*q; cx.strokeStyle=`rgba(28,28,28,${a})`; cx.beginPath();
+      for(let x=-XS;x<=XS;x+=S){ cx.moveTo(cxm+x/z1*f,hy-Y/z1*f); cx.lineTo(cxm+x/z2*f,hy-Y/z2*f); }
+      cx.stroke(); }
+    /* nodes */
+    for(let k=0;k<FAR;k++){ const z=k*S-off; if(z<NEAR+0.2) continue;
+      const iz=base+k, fade=Math.pow(1-z/FAR,1.4);
+      for(let x=-XS;x<=XS;x+=S){
+        const r=hash(iz,x*7+(Y>0?101:0));
+        const sx=cxm+x/z*f, sy=hy-Y/z*f; if(sx<-20||sx>W+20||sy<-20||sy>H+20) continue;
+        let sz=Math.min(4,Math.max(1.2,3/z*(small?2.2:3)));
+        let c=[150,150,150], a=0.5*fade;
+        if(mix>0&&lastActive.length&&r<0.3){ const t=lastActive[Math.floor(hash(x,iz)*lastActive.length)]; const k2=COL[t]||c;
+          c=c.map((v,i)=>Math.round(v+(k2[i]-v)*mix)); a=(0.5+0.5*mix)*fade; sz*=1+0.5*mix; }
+        cx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+        /* streak when moving fast */
+        const st=Math.min(Math.abs(vel)*40,1);
+        if(st>0.12){ const z2=z+Math.sign(vel)*st*0.9; if(z2>NEAR){ const sy2=hy-Y/z2*f, sx2=cxm+x/z2*f;
+          cx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${a*0.55})`; cx.lineWidth=Math.min(1.4,sz*0.5); cx.beginPath(); cx.moveTo(sx,sy); cx.lineTo(sx2,sy2); cx.stroke(); } }
+        cx.fillRect(sx-sz/2,sy-sz/2,sz,sz);
+      }
+    }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+}
 </script>
 </body>
 </html>
