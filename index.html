@@ -109,6 +109,14 @@ ol.index .side{display:flex;align-items:center;justify-content:flex-end}
 .shot img{width:100%;height:auto;transform:scale(1.06);transition:transform 1.6s var(--ease)}
 .shotwrap.in .shot img{transform:none}
 .shot:hover img{transform:scale(1.015)}
+.project.off{display:none}
+.project.fadein{animation:pin .8s var(--ease)}
+@keyframes pin{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.filterbar{position:sticky;top:64px;z-index:30;display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 8px;padding:10px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--hair);border-radius:999px;width:max-content;max-width:100%;font-size:14px;letter-spacing:.04em}
+.filterbar.on{display:flex}
+.filterbar b{font-weight:700}
+.filterbar button{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);padding:4px 2px}
+.filterbar button:hover{color:var(--ink)}
 .back{display:inline-block;margin-top:6px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);text-decoration:none}
 .back:hover{color:var(--ink)}
 
@@ -176,6 +184,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
   .tl{height:300px}
   .tl .lb{font-size:10.5px}
   .cue{display:none}
+  .filterbar{font-size:13px;gap:8px;padding:8px 14px;flex-wrap:nowrap;white-space:nowrap}
 }
 @media (hover:none){#peek{display:none}}
 @media (prefers-reduced-motion: reduce){
@@ -214,7 +223,7 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
   <ol class="index" id="index"></ol>
 </section>
 
-<section id="projects" style="padding-top:0"></section>
+<section id="projects" style="padding-top:0"><div class="filterbar" id="fbar"></div></section>
 
 <section id="about">
   <div class="about">
@@ -325,7 +334,7 @@ P.forEach((p,i)=>{
    <dl class="rv d2"><dt>Place</dt><dd>${p.place}</dd><dt>Year</dt><dd>${p.yr}</dd><dt>Context</dt><dd>${p.ctx}</dd><dt>Role</dt><dd>${p.role}</dd></dl>
    ${p.d.map(x=>`<p class="rv d2">${x}</p>`).join("")}<a class="back" href="#work">↑ Contents</a></div>
    <div class="gallery">${p.pages.map(n=>`<figure class="shot" data-full="img/p${pad(n)}.jpg"><img src="img/p${pad(n)}_s.jpg" srcset="img/p${pad(n)}_s.jpg 800w, img/p${pad(n)}.jpg 2000w" sizes="(max-width:1024px) 92vw, 64vw" alt="${p.t}, sheet" loading="lazy" width="2000" height="1414"></figure>`).join("")}</div>`;
-  prj.appendChild(s);
+  prj.appendChild(s); p.sec=s;
 });
 
 /* filters with counts + FLIP shift */
@@ -344,10 +353,26 @@ function applyFilter(k,btn){
   else { const on=P.filter(p=>p.tags.includes(k)), off=P.filter(p=>!p.tags.includes(k)); order=[...on,...off]; }
   order.forEach(p=>{ idx.appendChild(p.li); p.li.classList.toggle("dim",k!=="all"&&!p.tags.includes(k)); });
   idx.querySelectorAll(".n").forEach((n,i)=>n.textContent=pad(i+1));
+  const shown=P.filter(p=>k==="all"||p.tags.includes(k));
+  P.forEach(p=>{ const on=shown.includes(p); const was=!p.sec.classList.contains("off");
+    p.sec.classList.toggle("off",!on);
+    if(on&&!was){ p.sec.classList.remove("fadein"); void p.sec.offsetWidth; p.sec.classList.add("fadein"); } });
+  shown.forEach((p,i)=>{ p.sec.querySelector(".num").textContent=`${pad(i+1)} / ${pad(shown.length)}`; });
+  const fb=document.getElementById("fbar");
+  if(k==="all"){ fb.classList.remove("on"); fb.innerHTML=""; }
+  else { const lab=SCALES.find(x=>x[0]===k)[1];
+    fb.innerHTML=`<span class="dot c-${k}"></span><span><b>${lab}</b> · ${shown.length} of ${P.length} projects</span><button type="button">Show all ✕</button>`;
+    fb.querySelector("button").onclick=()=>applyFilter("all",fwrap.querySelector('.chip[data-k="all"]'));
+    fb.classList.add("on"); }
   items.forEach(el=>{ const dy=first.get(el)-el.getBoundingClientRect().top; if(!dy) return;
     el.style.transition="none"; el.style.transform=`translateY(${dy}px)`; el.getBoundingClientRect();
     el.style.transition=""; el.style.transform=""; });
 }
+
+/* clicking a dimmed project clears the filter first */
+idx.addEventListener("click",e=>{ const li=e.target.closest("li"); if(!li||!li.classList.contains("dim")) return;
+  e.preventDefault(); applyFilter("all",fwrap.querySelector('.chip[data-k="all"]'));
+  requestAnimationFrame(()=>document.getElementById(li.dataset.id).scrollIntoView({behavior:"smooth"})); });
 
 /* reveal on scroll */
 const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{rootMargin:"0px 0px -8% 0px",threshold:.08});
