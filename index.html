@@ -504,7 +504,14 @@ li.onclick=e=>{
   if(inside(document.getElementById("close"),e)){ close(); return; }
   if(lb.classList.contains("zoom")){ lb.classList.remove("zoom"); return; }
   const r=li.getBoundingClientRect(), x=(e.clientX-r.left)/r.width;
-  if(x<0.125) turn(-1); else if(x>0.875) turn(1); else lb.classList.add("zoom");
+  if(x<0.125) turn(-1); else if(x>0.875) turn(1); else {
+    /* zoom in on the exact spot that was tapped */
+    const fx=x, fy=(e.clientY-r.top)/r.height, st=document.getElementById("stage");
+    lb.classList.add("zoom");
+    const W=li.offsetWidth, H=li.offsetHeight;
+    st.scrollLeft=li.offsetLeft+fx*W-st.clientWidth/2;
+    st.scrollTop =li.offsetTop +fy*H-st.clientHeight/2;
+  }
 };
 document.getElementById("stage").addEventListener("click",e=>{ if(e.target!==e.currentTarget||lb.classList.contains("zoom")) return;
   const r=li.getBoundingClientRect(); if(e.clientX<r.left) turn(-1); else if(e.clientX>r.right) turn(1); });
