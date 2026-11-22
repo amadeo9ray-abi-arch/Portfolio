@@ -438,58 +438,49 @@ addEventListener("keydown",e=>{ if(!lb.classList.contains("on")) return;
 let sx=null; lb.addEventListener("touchstart",e=>{ if(e.touches.length===1&&!lb.classList.contains("zoom")) sx=e.touches[0].clientX; },{passive:true});
 lb.addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>60) (dx<0?document.getElementById("next"):document.getElementById("prev")).click(); });
 
-/* 3D grid background: one grid plane rising away toward a vanishing point above the screen.
-   Scrolling down slides the grid upward into the distance; nodes take the colours of the project in view */
+/* Grid background: a flat, straight grid that slides vertically (a bit faster than the page) as you scroll.
+   Very light hairlines; nodes at the intersections take the colours of the project in view */
 {
 const cv=document.getElementById("bg"), cx=cv.getContext("2d");
 const COL={urban:[200,54,45],landscape:[95,138,74],architecture:[28,28,28],interior:[181,154,106],research:[138,138,138]};
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-let W,H,DPR,small,f,hy;
-function size(){ DPR=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight; small=W<700;
-  cv.width=W*DPR; cv.height=H*DPR; cx.setTransform(DPR,0,0,DPR,0,0);
-  f=H*1.15; hy=-H*0.3; }
+let W,H,DPR,CELL;
+function size(){ DPR=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cx.setTransform(DPR,0,0,DPR,0,0); CELL=W<700?44:56; }
 size(); addEventListener("resize",size);
-const K=0.002, S=0.15;
-let camZ=-scrollY*K, vel=0, active=[], mix=0, lastActive=[];
+const SPEED=1.6; /* grid moves 1.6x the page speed */
+let pos=scrollY*SPEED, vel=0, active=[], mix=0, lastActive=[];
 const hash=(a,b)=>{ let h=(a*374761393+b*668265263)^0x5bd1e995; h=(h^(h>>>13))*1274126177; return ((h^(h>>>16))>>>0)/4294967296; };
 const po=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const p=P.find(q=>q.id===e.target.id); if(p) active=p.tags; } }),{rootMargin:"-40% 0px -40% 0px"});
 P.forEach(p=>po.observe(p.sec));
 const hide=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) active=[]; }),{rootMargin:"-40% 0px -40% 0px"});
 ["top","about","contact","work"].forEach(id=>{ const el=document.getElementById(id); if(el) hide.observe(el); });
-const Y=1; /* camera height above the plane */
 function frame(){
-  const target=-scrollY*K;
-  const prev=camZ; camZ+=(target-camZ)*(reduce?1:0.12); vel+=((camZ-prev)-vel)*0.3;
+  const target=scrollY*SPEED, prev=pos;
+  pos+=(target-pos)*(reduce?1:0.14); vel+=((pos-prev)-vel)*0.3;
   if(active.length){ lastActive=active; mix=Math.min(1,mix+0.04); } else mix=Math.max(0,mix-0.04);
   cx.clearRect(0,0,W,H);
-  const zNear=f*Y/(H+40-hy), zFar=f*Y/(-hy)+0.6, cxm=W/2;
-  const XS=Math.ceil((W/2+40)*zFar/f/S)*S;
-  const off=((camZ%S)+S)%S, base=Math.floor(camZ/S);
-  const fadeOf=z=>{ const q=Math.max(0,1-(z-zNear)/(zFar-zNear)); return q; };
-  const proj=(x,z)=>[cxm+x/z*f, hy+Y/z*f];
-  /* cross lines (move upward as you scroll down) */
-  for(let k=0;;k++){ const z=zNear+k*S-off+S; if(z>zFar) break; if(z<zNear) continue;
-    const q=fadeOf(z), a=0.14*q; const [x1,y]=proj(-XS,z), [x2]=proj(XS,z);
-    cx.strokeStyle=`rgba(28,28,28,${a})`; cx.lineWidth=1; cx.beginPath(); cx.moveTo(x1,y); cx.lineTo(x2,y); cx.stroke(); }
-  /* rails toward the vanishing point, in segments that fade upward */
-  for(let z1=zNear;z1<zFar;z1+=S){ const z2=Math.min(z1+S,zFar), a=0.12*fadeOf(z1);
-    cx.strokeStyle=`rgba(28,28,28,${a})`; cx.beginPath();
-    for(let x=-XS;x<=XS+1e-6;x+=S){ const [a1,b1]=proj(x,z1),[a2,b2]=proj(x,z2); cx.moveTo(a1,b1); cx.lineTo(a2,b2); }
-    cx.stroke(); }
+  const off=((pos%CELL)+CELL)%CELL, row0=Math.floor(pos/CELL);
+  const x0=((W/2)%CELL); /* centre the columns */
+  const hair=1/DPR;
+  /* hairlines */
+  cx.strokeStyle="rgba(0,0,0,0.07)"; cx.lineWidth=hair; cx.beginPath();
+  for(let x=x0;x<=W;x+=CELL){ const px=Math.round(x*DPR)/DPR+hair/2; cx.moveTo(px,0); cx.lineTo(px,H); }
+  for(let y=-off;y<=H;y+=CELL){ const py=Math.round(y*DPR)/DPR+hair/2; cx.moveTo(0,py); cx.lineTo(W,py); }
+  cx.stroke();
   /* nodes */
-  const st=Math.min(Math.abs(vel)*120,1);
-  for(let k=0;;k++){ const z=zNear+k*S-off+S; if(z>zFar) break; if(z<zNear) continue;
-    const iz=base+Math.round((zNear+k*S+S)/S), fade=Math.pow(fadeOf(z),1.2);
-    for(let xi=-Math.round(XS/S);xi<=Math.round(XS/S);xi++){ const x=xi*S;
-      const [sx,sy]=proj(x,z); if(sx<-10||sx>W+10||sy<-10||sy>H+10) continue;
-      const r=hash(iz,xi);
-      let sz=Math.min(5,Math.max(1.4,1.6/z*(small?2.2:2.8)));
-      let c=[150,150,150], a=0.5*fade;
-      if(mix>0&&lastActive.length&&r<0.35){ const t=lastActive[Math.floor(hash(xi,iz)*lastActive.length)]; const k2=COL[t]||c;
-        c=c.map((v,i)=>Math.round(v+(k2[i]-v)*mix)); a=(0.5+0.5*mix)*fade; sz*=1+0.5*mix; }
-      if(st>0.12){ const z2=z-Math.sign(vel)*st*S*0.9; if(z2>0.05){ const [sx2,sy2]=proj(x,z2);
-        cx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${a*0.55})`; cx.lineWidth=Math.min(1.4,sz*0.5); cx.beginPath(); cx.moveTo(sx,sy); cx.lineTo(sx2,sy2); cx.stroke(); } }
-      cx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`; cx.fillRect(sx-sz/2,sy-sz/2,sz,sz);
+  const st=Math.min(Math.abs(vel)/24,1);
+  let r=0;
+  for(let y=-off, ri=row0; y<=H+CELL; y+=CELL, ri++){
+    for(let x=x0, ci=0; x<=W; x+=CELL, ci++){
+      const h=hash(ri,ci);
+      let c=[175,175,175], a=0.25, sz=1.8;
+      if(mix>0&&lastActive.length&&h<0.22){ const t=lastActive[Math.floor(hash(ci,ri)*lastActive.length)], k=COL[t]||c;
+        c=c.map((v,i)=>Math.round(v+(k[i]-v)*mix)); a=0.35+0.55*mix; sz=2+1.6*mix; }
+      cx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+      if(st>0.08){ const len=Math.min(CELL*0.8,Math.abs(vel)*1.2); cx.fillRect(x-sz/2, y-sz/2+(vel>0?0:-0)+ (vel>0?0:0), sz, sz);
+        cx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a*0.45})`; cx.fillRect(x-Math.max(1,sz*0.35)/2, vel>0?y:y-len, Math.max(1,sz*0.35), len); }
+      else cx.fillRect(x-sz/2,y-sz/2,sz,sz);
     }
   }
   requestAnimationFrame(frame);
