@@ -172,19 +172,19 @@ footer{padding:40px var(--pad) max(40px,env(safe-area-inset-bottom));font-size:1
 /* lightbox */
 #lb{position:fixed;inset:0;background:rgba(255,255,255,.97);z-index:100;display:none;flex-direction:column}
 #lb.on{display:flex}
-#lb .stage{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;touch-action:pan-x pan-y pinch-zoom}
+#lb .stage{position:relative;z-index:1;flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;touch-action:pan-x pan-y pinch-zoom}
 #lb img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;transition:opacity .3s}
 #lb.zoom .stage{display:block}
 #lb.zoom img{max-width:none;max-height:none;width:240%;cursor:zoom-out}
 #lb .ctl{display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad);padding-bottom:max(14px,env(safe-area-inset-bottom));font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
 #lb .ctl button{padding:8px 4px;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
 #lb .ctl button:hover{color:var(--ink)}
-#lb .ctl{justify-content:center}
-#lb .pt{position:absolute;top:50%;transform:translateY(-50%);z-index:102;width:56px;height:96px;display:flex;align-items:center;justify-content:center;opacity:.85;transition:opacity .6s ease;cursor:pointer;background:none;border:0}
+#lb .ctl{justify-content:center;position:relative;z-index:2}
+#lb .pt{position:fixed;top:50%;transform:translateY(-50%);z-index:102;width:56px;height:96px;display:flex;align-items:center;justify-content:center;opacity:.85;transition:opacity .6s ease;cursor:pointer;background:none;border:0}
 #lb .pt.L{left:max(8px,env(safe-area-inset-left))}#lb .pt.R{right:max(8px,env(safe-area-inset-right))}
 #lb .pt svg{width:22px;height:38px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
 #lb.dim .pt{opacity:.18}#lb .pt:hover{opacity:1!important}
-#close{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:103;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer}
+#close{position:fixed;transform:translateZ(0);top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:103;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer}
 #close svg{width:22px;height:22px;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 #close:hover svg{stroke-width:3.6}
 #lb img{cursor:pointer}
@@ -451,8 +451,8 @@ let list=[],pos=0;
 document.addEventListener("click",e=>{ const f=e.target.closest(".shot"); if(!f) return;
   list=[...f.closest(".gallery").querySelectorAll(".shot")]; pos=list.indexOf(f); show(); lb.classList.add("on"); wake(); document.body.style.overflow="hidden"; });
 function show(){ lb.classList.remove("zoom"); li.src=list[pos].dataset.full; const t=list[pos].closest(".project").querySelector("h3").textContent; cap.textContent=`${t} — ${pos+1}/${list.length}`; }
-function close(){ document.querySelectorAll(".book").forEach(b=>b.remove()); turning=false; li.style.visibility=""; lb.classList.remove("on"); document.body.style.overflow=""; }
-document.getElementById("close").onclick=close;
+function close(){ lb.classList.remove("zoom"); document.querySelectorAll(".book").forEach(b=>b.remove()); turning=false; li.style.visibility=""; lb.classList.remove("on"); document.body.style.overflow=""; }
+document.getElementById("close").addEventListener("click",e=>{e.stopPropagation();close();});
 /* turn the page like a booklet: each image = left page + right page */
 let turning=false;
 function turn(dir){
@@ -499,7 +499,9 @@ function turn(dir){
 document.getElementById("prev").onclick=()=>turn(-1);
 document.getElementById("next").onclick=()=>turn(1);
 /* tap zones: outer 12.5% each side = turn page, centre 75% = zoom in / out */
+const inside=(el,e)=>{const r=el.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;};
 li.onclick=e=>{
+  if(inside(document.getElementById("close"),e)){ close(); return; }
   if(lb.classList.contains("zoom")){ lb.classList.remove("zoom"); return; }
   const r=li.getBoundingClientRect(), x=(e.clientX-r.left)/r.width;
   if(x<0.125) turn(-1); else if(x>0.875) turn(1); else lb.classList.add("zoom");
